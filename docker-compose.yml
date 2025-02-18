@@ -31,3 +31,19 @@ services:
         limits:
           cpus: '2'
           memory: 256M
+
+  web-apps:
+    build:
+      context: ./web-apps
+      dockerfile: Dockerfile
+    container_name: web-apps
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
