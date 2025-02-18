@@ -3,7 +3,7 @@ name: Backend Service CI
 on:
   push:
     paths:
-      - 'backend-services/**'
+      - 'backend-service/**'
 
 jobs:
   ci-backend-services:
@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+          cache-dependency-path: backend-service/pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install
       - name: Run lint
