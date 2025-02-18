@@ -1,0 +1,33 @@
+services:
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    hostname: neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+      - NEO4J_server_bolt_tls__level=REQUIRED
+      - NEO4J_dbms_ssl_policy_bolt_enabled=true
+      - NEO4J_dbms_ssl_policy_bolt_base__directory=/ssl/bolt
+      - NEO4J_dbms_ssl_policy_bolt_private__key=private.key
+      - NEO4J_dbms_ssl_policy_bolt_public__certificate=public.crt
+      - NEO4J_dbms_ssl_policy_bolt_private__key__password=${NEO4J_CERTIFICATE_PASSPHRASE}
+      - NEO4J_dbms_ssl_policy_https_enabled=true
+      - NEO4J_dbms_ssl_policy_https_base__directory=/ssl/https
+      - NEO4J_dbms_ssl_policy_https_private__key=private.key
+      - NEO4J_dbms_ssl_policy_https_public__certificate=public.crt
+      - NEO4J_dbms_ssl_policy_https_private__key__password=${NEO4J_CERTIFICATE_PASSPHRASE}
+      - NEO4J_server_memory_heap_initial__size=128M
+      - NEO4J_server_memory_heap_max__size=128M
+      - NEO4J_server_memory_pagecache_size=128M
+    volumes:
+      - ./infrastructure/neo4j/data:/data
+      - ./infrastructure/neo4j/certificates:/ssl
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 256M
