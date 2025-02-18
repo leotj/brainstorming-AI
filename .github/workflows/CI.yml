@@ -13,7 +13,7 @@ jobs:
     defaults:
       run:
         working-directory: ./web-apps
-    if: github.event_name == 'push' && contains(github.event.head_commit.added, 'web-apps/') || contains(github.event.head_commit.modified, 'web-apps/')
+    if: github.event_name == 'push' && (contains(github.event.head_commit.modified.*, 'web-apps/') || contains(github.event.head_commit.added.*, 'web-apps/'))
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
