@@ -1,6 +1,10 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class InitiateConversationDto {
+export class SelectConversationDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
   @IsString()
   @IsNotEmpty()
   message: string;

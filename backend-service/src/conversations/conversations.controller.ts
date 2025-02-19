@@ -1,11 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { OpenAIService } from '../openai/openai.service';
+import { ConversationsService } from 'src/conversations/conversations.service';
 import { InitiateConversationDto } from './dto/initiate-conversation.dto';
+import { SelectConversationDto } from './dto/select-conversation.dto';
 
 @Controller('conversations')
 export class ConversationsController {
-  constructor(private readonly openAIService: OpenAIService) {}
+  constructor(private readonly conversationsService: ConversationsService) {}
 
   @Post()
   @ApiOperation({
@@ -37,7 +38,7 @@ export class ConversationsController {
     },
   })
   initiateConversation(@Body() initiateConversationDto: InitiateConversationDto) {
-    return this.openAIService.getResponses(initiateConversationDto.userInput);
+    return this.conversationsService.initiateConversation(initiateConversationDto);
   }
 
   @Post('/select')
@@ -50,8 +51,8 @@ export class ConversationsController {
     status: 200,
     description: 'Knowledge graph updated successfully.',
   })
-  select() {
-    return null;
+  select(@Body() selectConversationDto: SelectConversationDto) {
+    return this.conversationsService.select(selectConversationDto);
   }
 
   @Post('/elaborate')

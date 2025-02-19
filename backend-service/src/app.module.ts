@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ConversationsModule } from './conversations/conversations.module';
-import { OpenAIService } from './openai/openai.service';
+import { ConversationsModule } from 'src/conversations/conversations.module';
+import { Neo4jModule } from 'src/neo4j/neo4j.module';
+import { OpenAIService } from 'src/openai/openai.service';
+import { GraphModule } from 'src/graph/graph.module';
 
 @Module({
   imports: [
@@ -10,6 +12,8 @@ import { OpenAIService } from './openai/openai.service';
       envFilePath: '../.env',
     }),
     ConversationsModule,
+    Neo4jModule,
+    GraphModule,
   ],
   providers: [OpenAIService],
 })
