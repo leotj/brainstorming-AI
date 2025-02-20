@@ -4,9 +4,10 @@ import { EventsModule } from 'src/events/events.module';
 import { ConversationsService } from './conversations.service';
 import { OpenAIService } from '../openai/openai.service';
 import { ConversationsController } from './conversations.controller';
+import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
-  imports: [GraphModule, EventsModule],
+  imports: [GraphModule, EventsModule, CacheModule],
   controllers: [ConversationsController],
   providers: [ConversationsService, OpenAIService],
 })

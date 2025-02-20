@@ -17,20 +17,12 @@ export class OpenAIService {
     this.client = client;
   }
 
-  async getResponses(query: string): Promise<ChatCompletion> {
+  async getResponses(
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  ): Promise<ChatCompletion> {
     try {
       const chatCompletion = await this.client.chat.completions.create({
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a knowledgeable assistant. Respond in plain text only. Do not use Markdown, bullet points, bold text, or numbered lists. Write in complete sentences using normal paragraph spacing without extra newlines. Keep the response structured as a natural paragraph.',
-          },
-          {
-            role: 'user',
-            content: query,
-          },
-        ],
+        messages,
         model: this.configService.get<string>('OPENAI_DEPLOYMENT') || 'gpt-4',
         n: 1,
         temperature: 0.7,

@@ -1,5 +1,6 @@
-import { Controller, Post, Body, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Req, HttpCode } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { RequestWithCookies } from 'src/types/request';
 import { ConversationsService } from 'src/conversations/conversations.service';
 import { InitiateConversationDto } from './dto/initiate-conversation.dto';
 import { SelectConversationDto } from './dto/select-conversation.dto';
@@ -37,8 +38,14 @@ export class ConversationsController {
       },
     },
   })
-  initiateConversation(@Body() initiateConversationDto: InitiateConversationDto) {
-    return this.conversationsService.initiateConversation(initiateConversationDto);
+  initiateConversation(
+    @Req() req: RequestWithCookies,
+    @Body() initiateConversationDto: InitiateConversationDto,
+  ) {
+    return this.conversationsService.initiateConversation(
+      req.cookies.userId,
+      initiateConversationDto,
+    );
   }
 
   @Post('/select')

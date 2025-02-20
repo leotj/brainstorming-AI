@@ -25,6 +25,7 @@ export default function Home() {
     try {
       const response = await fetch(`${process.env.BACKEND_SERVICE_HOST}/conversations`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -53,7 +54,8 @@ export default function Home() {
 
   const resetChat = async () => {
     await fetch(`${process.env.BACKEND_SERVICE_HOST}/conversations/reset`, {
-      method: "POST"
+      method: "POST",
+      credentials: "include",
     });
     setMessages([{ role: "ai", text: "Hello! How can I assist you today?" }]);
     setChatCount(0);
