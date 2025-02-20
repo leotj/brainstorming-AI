@@ -24,7 +24,7 @@ export class OpenAIService {
           {
             role: 'system',
             content:
-              'You are a knowledgeable assistant that provides multiple perspectives on topics',
+              'You are a knowledgeable assistant. Respond in plain text only. Do not use Markdown, bullet points, bold text, or numbered lists. Write in complete sentences using normal paragraph spacing without extra newlines. Keep the response structured as a natural paragraph.',
           },
           {
             role: 'user',
@@ -33,8 +33,8 @@ export class OpenAIService {
         ],
         model: this.configService.get<string>('OPENAI_DEPLOYMENT') || 'gpt-4',
         n: 3,
-        temperature: Number(this.configService.get<number>('OPENAI_CHAT_COMPLETIONS_TEMPERATURE')),
-        max_tokens: Number(this.configService.get<number>('OPENAI_CHAT_COMPLETIONS_MAX_TOKENS')),
+        temperature: 0.7,
+        max_tokens: 48,
       });
 
       return chatCompletion;
@@ -54,7 +54,7 @@ export class OpenAIService {
           {
             role: 'system',
             content:
-              'You are a precise assistant that extracts entities and relationships from text and returns them in JSON format.',
+              'You are a precise assistant that extracts only the 4 most important entities and their strongest relationships from text. Focus on the most essential concepts, avoiding secondary or less relevant terms.',
           },
           {
             role: 'user',
@@ -122,8 +122,8 @@ export class OpenAIService {
           },
         ],
         n: 1,
-        temperature: Number(this.configService.get<number>('OPENAI_CHAT_COMPLETIONS_TEMPERATURE')),
-        max_tokens: 200,
+        temperature: 0.3,
+        max_tokens: 500,
       });
       return chatCompletion;
     } catch (error) {
