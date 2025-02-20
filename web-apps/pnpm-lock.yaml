@@ -11,6 +11,9 @@ importers:
       '@react-sigma/core':
         specifier: ^5.0.2
         version: 5.0.2(graphology@0.26.0(graphology-types@0.24.8))(react@19.0.0)(sigma@3.0.1(graphology-types@0.24.8))
+      '@react-sigma/layout-forceatlas2':
+        specifier: ^5.0.2
+        version: 5.0.2(graphology-layout-forceatlas2@0.10.1(graphology-types@0.24.8))(graphology@0.26.0(graphology-types@0.24.8))(react@19.0.0)(sigma@3.0.1(graphology-types@0.24.8))
       graphology:
         specifier: ^0.26.0
         version: 0.26.0(graphology-types@0.24.8)
@@ -341,6 +344,14 @@ packages:
       graphology: ^0.25.4
       react: ^18.0.0 || ^19.0.0
       sigma: ^3.0.0
+
+  '@react-sigma/layout-core@5.0.2':
+    resolution: {integrity: sha512-kBD/nkgKMBlDOlYslaG/n71JiWXEYwcTIhfTBkYqXh8Ukipxm/O4TdUpJeyUpjcLT/92tRnTN7m8KaGGWNpH+A==}
+
+  '@react-sigma/layout-forceatlas2@5.0.2':
+    resolution: {integrity: sha512-+x05LMmjVOtwiu9EJ7CbgtRVDo/0jNT6dXqjLWvXPVy7BD/uRF4iMs/1KhSmnR5R9TTbznkpUd4iX7o/CLkxRg==}
+    peerDependencies:
+      graphology-layout-forceatlas2: ^0.10.1
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
@@ -979,6 +990,11 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  graphology-layout-forceatlas2@0.10.1:
+    resolution: {integrity: sha512-ogzBeF1FvWzjkikrIFwxhlZXvD2+wlY54lqhsrWprcdPjopM2J9HoMweUmIgwaTvY4bUYVimpSsOdvDv1gPRFQ==}
+    peerDependencies:
+      graphology-types: '>=0.19.0'
 
   graphology-types@0.24.8:
     resolution: {integrity: sha512-hDRKYXa8TsoZHjgEaysSRyPdT6uB78Ci8WnjgbStlQysz7xR52PInxNsmnB7IBOM1BhikxkNyCVEFgmPKnpx3Q==}
@@ -2016,6 +2032,23 @@ snapshots:
       react: 19.0.0
       sigma: 3.0.1(graphology-types@0.24.8)
 
+  '@react-sigma/layout-core@5.0.2(graphology@0.26.0(graphology-types@0.24.8))(react@19.0.0)(sigma@3.0.1(graphology-types@0.24.8))':
+    dependencies:
+      '@react-sigma/core': 5.0.2(graphology@0.26.0(graphology-types@0.24.8))(react@19.0.0)(sigma@3.0.1(graphology-types@0.24.8))
+    transitivePeerDependencies:
+      - graphology
+      - react
+      - sigma
+
+  '@react-sigma/layout-forceatlas2@5.0.2(graphology-layout-forceatlas2@0.10.1(graphology-types@0.24.8))(graphology@0.26.0(graphology-types@0.24.8))(react@19.0.0)(sigma@3.0.1(graphology-types@0.24.8))':
+    dependencies:
+      '@react-sigma/layout-core': 5.0.2(graphology@0.26.0(graphology-types@0.24.8))(react@19.0.0)(sigma@3.0.1(graphology-types@0.24.8))
+      graphology-layout-forceatlas2: 0.10.1(graphology-types@0.24.8)
+    transitivePeerDependencies:
+      - graphology
+      - react
+      - sigma
+
   '@rtsao/scc@1.1.0': {}
 
   '@rushstack/eslint-patch@1.10.5': {}
@@ -2854,6 +2887,11 @@ snapshots:
   graceful-fs@4.2.11: {}
 
   graphemer@1.4.0: {}
+
+  graphology-layout-forceatlas2@0.10.1(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
 
   graphology-types@0.24.8: {}
 

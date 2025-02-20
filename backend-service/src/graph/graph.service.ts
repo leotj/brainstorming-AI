@@ -9,4 +9,8 @@ export class GraphService {
   async saveGraph(graphData: GraphData) {
     await this.graphRepository.saveGraph(graphData);
   }
+
+  async getGraph() {
+    return await this.graphRepository.getGraph();
+  }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Neo4jService } from 'src/neo4j/neo4j.service';
 import { GraphData } from 'src/types/graph';
+import { TopicRelatedToTopic } from 'src/types/neo4j';
 
 @Injectable()
 export class GraphRepository {
@@ -24,9 +25,18 @@ export class GraphRepository {
       `;
 
       await this.neo4jService.runQuery(query, {
-        sourceLabel: edge.source,
-        targetLabel: edge.target,
+        sourceLabel: edge.from,
+        targetLabel: edge.to,
       });
     }
+  }
+
+  async getGraph() {
+    const query = `
+      MATCH (n:Topic)-[r]->(m:Topic)
+      RETURN n, r, m
+    `;
+
+    return await this.neo4jService.runQuery<TopicRelatedToTopic>(query);
   }
 }

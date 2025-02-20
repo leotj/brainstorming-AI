@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import neo4j, { Driver, Session, Neo4jError } from 'neo4j-driver';
+import neo4j, { Driver, Session, Neo4jError, RecordShape, Result } from 'neo4j-driver';
 
 @Injectable()
 export class Neo4jService implements OnModuleDestroy {
@@ -25,10 +25,13 @@ export class Neo4jService implements OnModuleDestroy {
     this.driver = neo4j.driver(url!, neo4j.auth.basic(username!, password!));
   }
 
-  async runQuery(query: string, params: Record<string, any> = {}): Promise<any> {
+  async runQuery<T extends RecordShape>(
+    query: string,
+    params: Record<string, any> = {},
+  ): Promise<Result<T>> {
     const session: Session = this.driver.session();
     try {
-      return await session.run(query, params);
+      return await session.run<T>(query, params);
     } catch (error) {
       if (error instanceof Neo4jError) {
         throw new Error(`Neo4j query failed (${error.code}): ${error.message}`);

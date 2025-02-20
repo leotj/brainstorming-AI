@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense, useEffect, useState } from "react";
+import { GraphData } from "@/types/graph";
 import { socket } from "./socket";
 
 const SigmaContainer = dynamic(
@@ -15,7 +16,10 @@ const GraphLoader = dynamic(() => import("@/components/GraphLoader"), {
 
 export default function KnowledgeGraph() {
   const [isConnected, setIsConnected] = useState(false);
-  const [graphData, setGraphData] = useState<String>();
+  const [graphData, setGraphData] = useState<GraphData>({
+    nodes: [],
+    edges: []
+  });
 
   useEffect(() => {
     if (socket.connected) {
@@ -30,18 +34,18 @@ export default function KnowledgeGraph() {
       setIsConnected(false);
     }
 
-    function onGraphDataUpdated({ value }: { value: string }) {
-      setGraphData(value);
+    function onGraphDataUpdated(data: GraphData) {
+      setGraphData(data);
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on("updateGraph", onGraphDataUpdated);
+    socket.on("graphDataUpdated", onGraphDataUpdated);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off("updateGraph", onGraphDataUpdated);
+      socket.off("graphDataUpdated", onGraphDataUpdated);
     };
   }, []);
 
@@ -49,10 +53,9 @@ export default function KnowledgeGraph() {
 
   return (
     <SigmaContainer style={sigmaStyle}>
-      <p>Status: { isConnected ? "connected" : "disconnected" }</p>
-      <p>Graph Data: { graphData }</p>
+      <p>Status: {isConnected ? "connected" : "disconnected"}</p>
       <Suspense fallback={null}>
-        <GraphLoader />
+        <GraphLoader graph={graphData}/>
       </Suspense>
     </SigmaContainer>
   );
