@@ -16,23 +16,45 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [chatCount, setChatCount] = useState(0);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim() || chatCount >= MAX_CHATS_PER_DAY) return;
 
     const newMessage = { role: "user", text: input };
     setMessages([...messages, newMessage, { role: "ai", text: "Thinking..." }]);
-    setInput("");
-    setChatCount(chatCount + 1);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${process.env.BACKEND_SERVICE_HOST}/conversations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: input,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
       setMessages((prev) => [
         ...prev.slice(0, -1),
-        { role: "ai", text: "Here’s your answer!" },
+        { role: "ai", text: data.choices[0].message.content },
       ]);
-    }, 1500);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+
+    setInput("");
+    setChatCount(chatCount + 1);
   };
 
-  const resetChat = () => {
+  const resetChat = async () => {
+    await fetch(`${process.env.BACKEND_SERVICE_HOST}/conversations/reset`, {
+      method: "POST"
+    });
     setMessages([{ role: "ai", text: "Hello! How can I assist you today?" }]);
     setChatCount(0);
   };
@@ -46,7 +68,7 @@ export default function Home() {
           {messages.map((msg, i) => (
             <CardContent
               key={i}
-              className={`p-3 rounded-lg max-w-xs ${
+              className={`p-4 rounded-lg w-full ${
                 msg.role === "user"
                   ? "bg-blue-500 text-white self-end"
                   : "bg-gray-200 text-black self-start"

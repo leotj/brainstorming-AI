@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ConversationsService } from 'src/conversations/conversations.service';
 import { InitiateConversationDto } from './dto/initiate-conversation.dto';
@@ -53,6 +53,21 @@ export class ConversationsController {
   })
   select(@Body() selectConversationDto: SelectConversationDto) {
     return this.conversationsService.select(selectConversationDto);
+  }
+
+  @Post('/reset')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Clear chat context',
+    description:
+      'Removes all chat history along with knowledge graph nodes and their relationships.',
+  })
+  @ApiResponse({ status: 200, description: 'Successfully reset the knowledge graph.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - You do not have permission.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  async resetKnowledgeGraph() {
+    await this.conversationsService.reset();
+    return { message: 'Knowledge graph has been reset.' };
   }
 
   @Post('/elaborate')

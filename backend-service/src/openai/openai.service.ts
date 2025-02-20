@@ -32,7 +32,7 @@ export class OpenAIService {
           },
         ],
         model: this.configService.get<string>('OPENAI_DEPLOYMENT') || 'gpt-4',
-        n: 3,
+        n: 1,
         temperature: 0.7,
         max_tokens: 48,
       });
@@ -54,7 +54,7 @@ export class OpenAIService {
           {
             role: 'system',
             content:
-              'You are a precise assistant that extracts only the 4 most important entities and their strongest relationships from text. Focus on the most essential concepts, avoiding secondary or less relevant terms.',
+              'You are a precise assistant that extracts only the 4 most important entities and their strongest relationships from text. Focus on the most essential concepts, avoiding secondary or less relevant terms. Ensure relationships use "from" and "to" instead of "source" and "target',
           },
           {
             role: 'user',
@@ -98,13 +98,13 @@ export class OpenAIService {
                     items: {
                       type: 'object',
                       properties: {
-                        source: {
+                        from: {
                           type: 'string',
-                          description: 'ID of the source entity',
+                          description: 'ID of the source entity (previously source)',
                         },
-                        target: {
+                        to: {
                           type: 'string',
-                          description: 'ID of the target entity',
+                          description: 'ID of the target entity (previously target)',
                         },
                         label: {
                           type: 'string',
@@ -112,7 +112,7 @@ export class OpenAIService {
                             'Description of the relationship with all letters capitalized and underscore to replace space',
                         },
                       },
-                      required: ['source', 'target', 'label'],
+                      required: ['from', 'to', 'label'],
                     },
                   },
                 },

@@ -19,14 +19,14 @@ export class GraphRepository {
 
     for (const edge of edges) {
       const query = `
-          MATCH (source:Topic {label: $sourceLabel})
-          MATCH (target:Topic {label: $targetLabel})
+          MATCH (source:Topic {label: $from})
+          MATCH (target:Topic {label: $to})
           MERGE (source)-[:${edge.label}]->(target)
       `;
 
       await this.neo4jService.runQuery(query, {
-        sourceLabel: edge.from,
-        targetLabel: edge.to,
+        from: edge.from,
+        to: edge.to,
       });
     }
   }
@@ -35,6 +35,15 @@ export class GraphRepository {
     const query = `
       MATCH (n:Topic)-[r]->(m:Topic)
       RETURN n, r, m
+    `;
+
+    return await this.neo4jService.runQuery<TopicRelatedToTopic>(query);
+  }
+
+  async deleteGraph() {
+    const query = `
+      MATCH (n)
+      DETACH DELETE n;
     `;
 
     return await this.neo4jService.runQuery<TopicRelatedToTopic>(query);

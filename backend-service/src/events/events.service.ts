@@ -5,7 +5,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GraphService } from 'src/graph/graph.service';
 import { Edge, GraphData, Node } from 'src/types/graph';
 
@@ -15,27 +15,19 @@ import { Edge, GraphData, Node } from 'src/types/graph';
   },
 })
 @Injectable()
-export class EventsService
-  implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit, OnModuleDestroy
-{
+export class EventsService implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private server: Server;
 
   private logger = new Logger(EventsService.name);
-  private intervalId: NodeJS.Timeout | null = null;
 
   constructor(private readonly graphService: GraphService) {}
 
-  onModuleInit() {
-    this.startEmittingUpdates();
-  }
-
-  onModuleDestroy() {
-    this.stopEmittingUpdates();
-  }
-
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
+    this.emitGraphDataUpdated()
+      .then(() => {})
+      .catch(() => {});
   }
 
   handleDisconnect(client: Socket) {
@@ -79,31 +71,12 @@ export class EventsService
     return graphData;
   }
 
-  private async emitGraphUpdates(): Promise<void> {
+  async emitGraphDataUpdated(): Promise<void> {
     try {
       const graphData = await this.getGraphData();
       this.server.emit('graphDataUpdated', graphData);
     } catch (error) {
       this.logger.log('Failed to get graph data', error);
-    }
-  }
-
-  private startEmittingUpdates() {
-    this.intervalId = setInterval(() => {
-      this.emitGraphUpdates()
-        .then(() => {
-          this.logger.log(`Emitting graphDataUpdated event`);
-        })
-        .catch(() => {
-          this.logger.log(`Emitting graphDataUpdated failed`);
-        });
-    }, 3000); // Emit every 3 seconds
-  }
-
-  private stopEmittingUpdates() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
     }
   }
 }
