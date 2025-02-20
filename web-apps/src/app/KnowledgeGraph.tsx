@@ -28,10 +28,12 @@ export default function KnowledgeGraph() {
 
     function onConnect() {
       setIsConnected(true);
+      console.log('isConnected', isConnected);
     }
 
     function onDisconnect() {
       setIsConnected(false);
+      console.log('isConnected', isConnected);
     }
 
     function onGraphDataUpdated(data: GraphData) {
@@ -47,13 +49,10 @@ export default function KnowledgeGraph() {
       socket.off("disconnect", onDisconnect);
       socket.off("graphDataUpdated", onGraphDataUpdated);
     };
-  }, []);
-
-  const sigmaStyle = { height: "500px", width: "1000px" };
+  }, [isConnected]);
 
   return (
-    <SigmaContainer style={sigmaStyle}>
-      <p>Status: {isConnected ? "connected" : "disconnected"}</p>
+    <SigmaContainer className="flex h-screen">
       <Suspense fallback={null}>
         <GraphLoader graph={graphData}/>
       </Suspense>
