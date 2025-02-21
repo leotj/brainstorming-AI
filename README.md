@@ -5,6 +5,11 @@
 1. Create .env file from .env.example
 2. docker-compose up
 
+## Software Development Requirements
+1. Docker & Docker Compose
+2. NodeJs v23.7.0
+3. Pnpm 10.2.1
+
 ## Architecture Diagram
 
 ### C4 Diagram - Context
