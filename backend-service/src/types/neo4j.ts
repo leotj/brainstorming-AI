@@ -10,7 +10,7 @@ type Topic = Node<Integer, TopicProperties>;
 type RelatedTo = Relationship<Integer>;
 
 export interface TopicRelatedToTopic {
-  n: Topic;
+  t1: Topic;
   r: RelatedTo;
-  m: Topic;
+  t2: Topic;
 }

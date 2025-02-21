@@ -1,43 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { InitiateConversationDto } from 'src/conversations/dto/initiate-conversation.dto';
-import { SelectConversationDto } from 'src/conversations/dto/select-conversation.dto';
 import { OpenAIService } from 'src/openai/openai.service';
-import { GraphService } from 'src/graph/graph.service';
+import { Neo4jService } from 'src/neo4j/neo4j.service';
 import { EventsService } from 'src/events/events.service';
-import { GraphData } from 'src/types/graph';
 import { INITIAL_SYSTEM_ROLE } from 'src/prompt/conversation.prompt';
 import { CacheService } from 'src/cache/cache.service';
+import { GraphData } from 'src/types/graph';
+import { HistoryCache } from 'src/types/cache';
 
 @Injectable()
 export class ConversationsService {
   constructor(
     private readonly openAIService: OpenAIService,
-    private readonly graphService: GraphService,
+    private readonly neo4jService: Neo4jService,
     private readonly eventsService: EventsService,
     private readonly cacheService: CacheService,
   ) {}
-
-  private async cacheConversationHistory(userId: string, data: { message: string }) {
-    let history: any[] = [];
-
-    const message = {
-      role: 'user',
-      content: data.message,
-    };
-
-    const historyCache = await this.cacheService.get(userId);
-
-    if (!historyCache) {
-      history.push(INITIAL_SYSTEM_ROLE);
-      history.push(message);
-      return await this.cacheService.set(userId, history, '1d');
-    } else {
-      history = history.concat(historyCache);
-      history.push(message);
-      return await this.cacheService.set(userId, history);
-    }
-  }
 
   async initiateConversation(userId: string, initiateConversationDto: InitiateConversationDto) {
     const historyCache = await this.cacheService.get(userId);
@@ -47,7 +26,7 @@ export class ConversationsService {
     if (!historyCache) {
       messages.push(INITIAL_SYSTEM_ROLE);
     } else {
-      messages = messages.concat(historyCache);
+      messages = messages.concat((historyCache as HistoryCache).messages);
     }
 
     messages.push({
@@ -59,6 +38,7 @@ export class ConversationsService {
       messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
     );
 
+    const conversationId = historyCache ? (historyCache as HistoryCache).id : response.id;
     const content = response.choices[0].message.content;
 
     messages.push({
@@ -66,38 +46,46 @@ export class ConversationsService {
       content,
     });
 
-    await this.cacheService.set(userId, messages, '1d');
+    const history = {
+      id: conversationId,
+      messages,
+    };
+
+    await this.cacheService.set(userId, history, '1d');
 
     if (content) {
       const completion = await this.openAIService.getStructuredResponse(content);
       const rawArguments = completion.choices[0].message.tool_calls![0].function
         .arguments as unknown as string;
       const graphData = JSON.parse(rawArguments) as GraphData;
-      await this.graphService.saveGraph(graphData);
-      await this.eventsService.emitGraphDataUpdated();
+      await this.neo4jService.addUserKnowledgeGraph(userId, conversationId, graphData);
+      await this.eventsService.emitGraphDataUpdated(userId, conversationId);
     }
 
     return response;
   }
 
-  async select(selectConversationDto: SelectConversationDto) {
-    const { message } = selectConversationDto;
-
-    const completion = await this.openAIService.getStructuredResponse(message);
-
-    const rawArguments = completion.choices[0].message.tool_calls![0].function
-      .arguments as unknown as string;
-
-    const graphData = JSON.parse(rawArguments) as GraphData;
-
-    await this.graphService.saveGraph(graphData);
-
-    return graphData;
+  async getConversationHistory(userId: string): Promise<any[]> {
+    const historyCache = await this.cacheService.get(userId);
+    return (historyCache as HistoryCache).messages.slice(1);
   }
 
-  async reset() {
-    const response = await this.graphService.deleteGraph();
-    await this.eventsService.emitGraphDataUpdated();
-    return response;
+  async select() {
+    // const { message } = selectConversationDto;
+    // const completion = await this.openAIService.getStructuredResponse(message);
+    // const rawArguments = completion.choices[0].message.tool_calls![0].function
+    //   .arguments as unknown as string;
+    // const graphData = JSON.parse(rawArguments) as GraphData;
+    // await this.graphService.saveGraph(graphData);
+    // return graphData;
+  }
+
+  async reset(userId: string) {
+    const historyCache = await this.cacheService.get(userId);
+    const conversationId = (historyCache as HistoryCache).id;
+
+    await this.neo4jService.deleteUserKnowledgeGraph(userId, conversationId);
+    await this.cacheService.delete(userId);
+    await this.eventsService.emitGraphDataUpdated(userId, conversationId);
   }
 }

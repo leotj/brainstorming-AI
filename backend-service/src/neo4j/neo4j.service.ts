@@ -1,48 +1,61 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import neo4j, { Driver, Session, Neo4jError, RecordShape, Result } from 'neo4j-driver';
+import { Injectable } from '@nestjs/common';
+import { Neo4jRepository } from './neo4j.repository';
+import { RecordShape, Result } from 'neo4j-driver';
+import { Edge, GraphData, Node } from 'src/types/graph';
 
 @Injectable()
-export class Neo4jService implements OnModuleDestroy {
-  private readonly driver: Driver;
-
-  constructor(private readonly configService: ConfigService) {
-    const url = this.configService.get<string>('NEO4J_URL');
-    const username = this.configService.get<string>('NEO4J_USERNAME');
-    const password = this.configService.get<string>('NEO4J_PASSWORD');
-
-    const missingVars = [];
-    if (!url) missingVars.push('NEO4J_URL');
-    if (!username) missingVars.push('NEO4J_USERNAME');
-    if (!password) missingVars.push('NEO4J_PASSWORD');
-
-    if (missingVars.length > 0) {
-      throw new Error(
-        `Can't connect to Neo4j. Missing environment variable(s): ${missingVars.join(', ')}`,
-      );
-    }
-
-    this.driver = neo4j.driver(url!, neo4j.auth.basic(username!, password!));
-  }
+export class Neo4jService {
+  constructor(private readonly repository: Neo4jRepository) {}
 
   async runQuery<T extends RecordShape>(
     query: string,
     params: Record<string, any> = {},
   ): Promise<Result<T>> {
-    const session: Session = this.driver.session();
-    try {
-      return await session.run<T>(query, params);
-    } catch (error) {
-      if (error instanceof Neo4jError) {
-        throw new Error(`Neo4j query failed (${error.code}): ${error.message}`);
-      }
-      throw new Error(`Unexpected error: ${(error as Error).message}`);
-    } finally {
-      await session.close();
-    }
+    return await this.repository.runQuery(query, params);
   }
 
-  onModuleDestroy() {
-    return this.driver.close();
+  async addUserKnowledgeGraph(userId: string, conversationId: string, graphData: GraphData) {
+    await this.repository.addUserKnowledgeGraph(userId, conversationId, graphData);
+  }
+
+  async getUserKnowledgeGraph(userId: string, conversationId: string) {
+    const neo4jGraph = await this.repository.getUserKnowledgeGraph(userId, conversationId);
+
+    const nodeSet = new Set<string>();
+    const edgeSet = new Set<string>();
+
+    const addToSet = (set: Set<string>, value: Node | Edge) => {
+      const key = JSON.stringify(value); // Convert object to string for comparison
+      if (!set.has(key)) {
+        set.add(key);
+      }
+    };
+
+    neo4jGraph.records.forEach((r) => {
+      addToSet(nodeSet, {
+        id: r.get('t1').elementId,
+        label: r.get('t1').properties.label,
+      });
+      addToSet(nodeSet, {
+        id: r.get('t2').elementId,
+        label: r.get('t2').properties.label,
+      });
+      addToSet(edgeSet, {
+        from: r.get('r').startNodeElementId,
+        to: r.get('r').endNodeElementId,
+        label: r.get('r').type,
+      });
+    });
+
+    const graphData: GraphData = {
+      nodes: [...nodeSet].map<Node>((n): Node => JSON.parse(n) as Node),
+      edges: [...edgeSet].map<Edge>((n): Edge => JSON.parse(n) as Edge),
+    };
+
+    return graphData;
+  }
+
+  async deleteUserKnowledgeGraph(userId: string, conversationId: string) {
+    await this.repository.deleteUserKnowledgeGraph(userId, conversationId);
   }
 }

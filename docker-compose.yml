@@ -1,3 +1,7 @@
+networks:
+  app-network:
+    driver: bridge
+
 services:
   neo4j:
     image: neo4j:latest
@@ -15,6 +19,8 @@ services:
     volumes:
       - ./infrastructure/neo4j/data:/data
       - ./infrastructure/neo4j/certificates:/ssl
+    networks:
+      - app-network
     deploy:
       resources:
         limits:
@@ -29,6 +35,8 @@ services:
     volumes:
       - ./infrastructure/redis/data:/data
     command: ["redis-server", "--requirepass", "$REDIS_PASSWORD"]
+    networks:
+      - app-network
     deploy:
       resources:
         limits:
@@ -40,14 +48,20 @@ services:
 
   web-apps:
     build:
-      context: ./web-apps
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: web-apps/Dockerfile
     container_name: web-apps
     ports:
       - "${WEB_APPS_PORT}:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
+      - BACKEND_SERVICE_HOST=http://backend-service:3001
+      - WEB_APPS_SOCKET_HOST=ws://backend-service:3001
     restart: always
+    networks:
+      - app-network
     deploy:
       resources:
         limits:
@@ -59,10 +73,16 @@ services:
       dockerfile: Dockerfile
     container_name: backend-service
     ports:
-      - "${BACKEND_SERVICE_PORT}:3000"
+      - "${BACKEND_SERVICE_PORT}:3001"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
+      - NEO4J_URL=bolt://neo4j:7687
+      - REDIS_HOST=redis
     restart: always
+    networks:
+      - app-network
     deploy:
       resources:
         limits:

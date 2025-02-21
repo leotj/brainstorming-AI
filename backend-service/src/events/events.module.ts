@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { GraphModule } from 'src/graph/graph.module';
+import { CacheModule } from 'src/cache/cache.module';
+import { Neo4jModule } from 'src/neo4j/neo4j.module';
 import { EventsService } from './events.service';
 
 @Module({
-  imports: [GraphModule],
+  imports: [CacheModule, Neo4jModule],
   providers: [EventsService],
   exports: [EventsService],
 })

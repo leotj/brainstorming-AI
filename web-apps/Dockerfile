@@ -7,16 +7,19 @@ WORKDIR /app
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Copy package files from the web-apps folder
+COPY web-apps/package.json web-apps/pnpm-lock.yaml ./
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy the rest of the application code
-COPY . .
+# Copy the rest of the application code from web-apps
+COPY web-apps/ .
 
-# Build the Next.js app
+# Copy .env file into the build stage
+COPY .env .env
+
+# Build the Next.js app (with environment variables)
 RUN pnpm run build
 
 # Stage 2: Serve the Next.js application
