@@ -25,17 +25,23 @@ FROM node:23-alpine
 # Set working directory
 WORKDIR /app
 
-# Install pnpm globally (for running the app)
+# Install pnpm globally
 RUN npm install -g pnpm
+
+# Set environment to production
+ENV NODE_ENV=production
+
+# Copy package.json and lockfile
+COPY package.json pnpm-lock.yaml ./
+
+# Install only production dependencies
+RUN pnpm install --frozen-lockfile --prod
 
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Command to run the application
-CMD ["pnpm", "start:prod"]
+CMD ["node", "dist/main.js"]
