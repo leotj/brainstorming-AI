@@ -1,5 +1,9 @@
-export interface HistoryCache {
-  id: string;
-  messages: any[];
-  [key: string]: any;
+export interface MessageCache {
+  role: string;
+  content: string;
+}
+
+export interface ConversationCache {
+  id?: string;
+  messages?: MessageCache[];
 }

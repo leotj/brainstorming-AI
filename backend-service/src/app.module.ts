@@ -2,10 +2,11 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UserIdMiddleware } from 'src/middlewares/user-id.middleware';
 import { ConversationsModule } from 'src/conversations/conversations.module';
-import { Neo4jModule } from 'src/neo4j/neo4j.module';
 import { OpenAIService } from 'src/openai/openai.service';
 import { EventsModule } from 'src/events/events.module';
 import { CacheModule } from 'src/cache/cache.module';
+import { SurrealdbModule } from './surrealdb/surrealdb.module';
+import { GraphModule } from './graph/graph.module';
 
 @Module({
   imports: [
@@ -15,8 +16,9 @@ import { CacheModule } from 'src/cache/cache.module';
     }),
     CacheModule,
     ConversationsModule,
-    Neo4jModule,
     EventsModule,
+    SurrealdbModule,
+    GraphModule,
   ],
   providers: [OpenAIService],
 })

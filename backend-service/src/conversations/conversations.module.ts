@@ -4,10 +4,10 @@ import { ConversationsService } from './conversations.service';
 import { OpenAIService } from '../openai/openai.service';
 import { ConversationsController } from './conversations.controller';
 import { CacheModule } from 'src/cache/cache.module';
-import { Neo4jModule } from 'src/neo4j/neo4j.module';
+import { GraphModule } from 'src/graph/graph.module';
 
 @Module({
-  imports: [EventsModule, CacheModule, Neo4jModule],
+  imports: [EventsModule, CacheModule, GraphModule],
   controllers: [ConversationsController],
   providers: [ConversationsService, OpenAIService],
 })

@@ -22,11 +22,12 @@ export class OpenAIService {
   ): Promise<ChatCompletion> {
     try {
       const chatCompletion = await this.client.chat.completions.create({
-        messages,
         model: this.configService.get<string>('OPENAI_DEPLOYMENT') || 'gpt-4',
+        response_format: { type: 'json_object' },
+        messages,
         n: 1,
         temperature: 0.7,
-        max_tokens: 48,
+        max_tokens: 300,
       });
 
       return chatCompletion;

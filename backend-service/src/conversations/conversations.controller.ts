@@ -2,7 +2,11 @@ import { Controller, Post, Body, Req, HttpCode, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RequestWithCookies } from 'src/types/request';
 import { ConversationsService } from 'src/conversations/conversations.service';
-import { InitiateConversationDto } from './dto/initiate-conversation.dto';
+import {
+  InitiateConversationRequestDto,
+  InitiateConversationResponseDto,
+} from './dto/initiate-conversation.dto';
+import { GetConversationHistoryResponseDto } from './dto/get-conversation-history.dto';
 
 @Controller('conversations')
 export class ConversationsController {
@@ -39,11 +43,11 @@ export class ConversationsController {
   })
   initiateConversation(
     @Req() req: RequestWithCookies,
-    @Body() initiateConversationDto: InitiateConversationDto,
-  ) {
+    @Body() initiateConversationRequestDto: InitiateConversationRequestDto,
+  ): Promise<InitiateConversationResponseDto> {
     return this.conversationsService.initiateConversation(
       req.cookies.userId,
-      initiateConversationDto,
+      initiateConversationRequestDto,
     );
   }
 
@@ -73,7 +77,9 @@ export class ConversationsController {
       },
     },
   })
-  getConversationHistory(@Req() req: RequestWithCookies) {
+  getConversationHistory(
+    @Req() req: RequestWithCookies,
+  ): Promise<GetConversationHistoryResponseDto | undefined> {
     return this.conversationsService.getConversationHistory(req.cookies.userId);
   }
 
@@ -88,7 +94,7 @@ export class ConversationsController {
     description: 'Knowledge graph updated successfully.',
   })
   select() {
-    return this.conversationsService.select();
+    return null;
   }
 
   @Post('/reset')
