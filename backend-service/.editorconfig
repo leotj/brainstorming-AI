@@ -21,3 +21,6 @@ insert_final_newline = false
 
 [*.yml]
 indent_size = 2
+
+[*.surql]
+indent_size = 4

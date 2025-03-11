@@ -1,31 +1,34 @@
 networks:
   app-network:
     driver: bridge
-
 services:
-  neo4j:
-    image: neo4j:latest
-    container_name: neo4j
-    hostname: neo4j
-    restart: unless-stopped
-    ports:
-      - "7474:7474"
-      - "7687:7687"
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: surrealdb
+    command: start --user ${SURREALDB_USERNAME} --pass ${SURREALDB_PASSWORD} rocksdb:/data/database.db
     environment:
-      - NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
-      - NEO4J_server_memory_heap_initial__size=128M
-      - NEO4J_server_memory_heap_max__size=128M
-      - NEO4J_server_memory_pagecache_size=128M
+      - SURREAL_LOG=info
     volumes:
-      - ./infrastructure/neo4j/data:/data
-      - ./infrastructure/neo4j/certificates:/ssl
-    networks:
-      - app-network
+      - ./infrastructure/surrealdb/data:/data
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: '0.5'
           memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    networks:
+      - app-network
   redis:
     image: redis:latest
     container_name: redis
@@ -44,8 +47,7 @@ services:
           memory: "512M"
         reservations:
           cpus: "0.25"
-          memory: "256M"
-
+          memory: "128M"
   web-apps:
     build:
       context: .
@@ -78,7 +80,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-      - NEO4J_URL=bolt://neo4j:7687
+      - SURREALDB_URL=http://surrealdb:8000
       - REDIS_HOST=redis
     restart: always
     networks:

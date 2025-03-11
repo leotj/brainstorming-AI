@@ -55,7 +55,7 @@ export default function Home() {
 
       setMessages((prev) => [
         ...prev.slice(0, -1),
-        { role: "system", text: data.choices[0].message.content },
+        { role: "system", text: data.response },
       ]);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -92,8 +92,14 @@ export default function Home() {
           credentials: "include",
         }
       );
-      const data = await response.json();
-      const history = data.map((e: {role: string, content: string}) => ({
+
+      if (!response.ok) return;
+
+      const text = await response.text();
+      if(!text) return;
+
+      const data = JSON.parse(text);
+      const history = data.messages.map((e: {role: string, content: string}) => ({
         role: e.role,
         text: e.content
       }));
@@ -154,7 +160,7 @@ export default function Home() {
         <Button
           onClick={resetChat}
           className="bg-red-500 hover:bg-red-600"
-          disabled={loading === true}
+          disabled={loading === true || chatCount === 0}
         >
           <RefreshCw size={18} />
         </Button>
